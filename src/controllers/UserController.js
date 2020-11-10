@@ -1,21 +1,21 @@
-const connection = require('../database/connection');
+import connection from '../database/connection';
 
-module.exports = {
+class UserController {
 
-    async show(request, response) {
+    static show = async (request, response) => {
         const { id } = request.params;
         const user = await connection('user')
                             .where('id', id)
                             .select('*');
         return response.json(user);
-    },
+    }
 
-    async index(request, response) {
+    static index = async (request, response) => {
         const users = await connection('user').select('*');
         return response.json(users);
-    },
+    }
 
-    async create(request, response) {
+    static create = async (request, response) => {
         const { firstName, lastName, email, yieldReceived } = request.body;
         const data = {
             firstName,
@@ -29,3 +29,4 @@ module.exports = {
 
 }
 
+export default UserController;
