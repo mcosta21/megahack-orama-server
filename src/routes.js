@@ -7,4 +7,6 @@ routes.get('/users/:id', UserController.show);
 routes.get('/users', UserController.index);
 routes.post('/users', UserController.create);
 
+console.log('test');
+
 module.exports = routes;
