@@ -39,7 +39,6 @@ class UserController {
 			lastName, 
 			email, 
 			password,
-			passwordConfirmation,
 			yieldReceived
 		} = req.body;
 		
@@ -59,7 +58,7 @@ class UserController {
 
 		// check if user exists
 		const user = await connection('user').where('email', email).select('*');
-		console.log(user);
+
 		if(user[0] !== undefined) {
 			return res.status(400).json({ error: 'User already exists' });
 		}
@@ -75,6 +74,8 @@ class UserController {
 			password: passwordHash,
 			yieldReceived,
 		};
+
+		passwordHash = undefined;
 		
 		const [ id ] = await connection('user').insert(newUser);
 
