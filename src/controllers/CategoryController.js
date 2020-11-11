@@ -71,13 +71,14 @@ class CategoryController {
     }
 
     // get category
-    const category = await connection('category').where('id', id).select('*');
+    const category = await connection('category').where({
+      id,
+      name,
+    }).select('*');
 
-    if(category[0] === undefined || category[0].name !== name) {
+    if(category[0] === undefined) {
       return res.status(204).json({ result: 'Category not found' });
     }
-
-    console.log(category)
 
     // update category name
     await connection('category').update({ name: newName }).where('id', id);

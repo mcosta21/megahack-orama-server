@@ -3,6 +3,7 @@ import { Router } from 'express';
 import UserController from './controllers/UserController';
 import AuthController from './controllers/AuthController';
 import CategoryController from './controllers/CategoryController';
+import SerieController from './controllers/SerieController';
 
 import authMiddleware from './middlewares/auth';
 
@@ -25,6 +26,13 @@ routes.get('/categories', CategoryController.index);
 routes.post('/categories', CategoryController.create);
 routes.put('/categories', CategoryController.update);
 routes.delete('/categories/:id', CategoryController.destroy);
+
+// serie
+routes.get('/series/:id', SerieController.show);
+routes.get('/series', SerieController.index);
+routes.post('/series', SerieController.create);
+routes.put('/series', SerieController.update);
+routes.delete('/series/:id', SerieController.destroy);
 
 
 export default routes;
