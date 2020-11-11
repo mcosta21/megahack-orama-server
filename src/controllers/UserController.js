@@ -22,6 +22,7 @@ class UserController {
 		const user = await connection('user')
 												.where('id', id)
 												.select('*');
+
 		if(user[0] === undefined) {
 			return res.status(400).json({ error: 'User not found' });
 		}
@@ -75,8 +76,6 @@ class UserController {
 			yieldReceived,
 		};
 
-		passwordHash = undefined;
-		
 		const [ id ] = await connection('user').insert(newUser);
 
 		return res.json(UserView.render(newUser));
