@@ -5,6 +5,7 @@ exports.up = function(knex) {
         table.string('firstName').notNullable();
         table.string('lastName').notNullable();
         table.string('email').notNullable();
+        table.string('password').notNullable();
         table.decimal('yieldReceived');
     });
 };
