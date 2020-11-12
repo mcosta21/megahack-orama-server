@@ -23,12 +23,12 @@ class SerieController {
       return res.status(400).json({ error: 'Serie not found' });
     }
 
-    return res.status(200).json(SerieView.render(serie[0]));
+    return res.status(200).json(await SerieView.render(serie[0]));
   }
 
   static index = async (req, res) => {
     const series = await connection('serie').select('*');
-    return res.status(200).json(SerieView.renderMany(series));
+    return res.status(200).json(await Promise.all(SerieView.renderMany(series)));
   }
 
   static create = async (req, res) => {
@@ -92,7 +92,7 @@ class SerieController {
       ...newSerie,
     }
 
-		return res.json(SerieView.render(createdSerie));
+    return res.status(200).json(await SerieView.render(createdSerie));
   }
 
   static update = async (req, res) => {
@@ -166,7 +166,7 @@ class SerieController {
     // get updated serie
     const updatedSerie = await connection('serie').where('id', id).select('*');
 
-    return res.status(200).json(SerieView.render(updatedSerie[0]));
+    return res.status(200).json(await SerieView.render(updatedSerie[0]));
   }
 
   static destroy = async (req, res) => {

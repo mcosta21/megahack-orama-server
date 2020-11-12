@@ -1,5 +1,9 @@
+import connection from '../database/connection';
+
 export default {
-  render(serie) {
+  async render(serie) {
+    const category = await connection('category').where('id', serie.categoryId).select('name');
+
     return {
       id: serie.id,
       cost: serie.cost,
@@ -7,7 +11,10 @@ export default {
       duration: serie.duration,
       title: serie.title,
       description: serie.description,
-      categoryId: serie.categoryId,
+      category: {
+        id: serie.categoryId,
+        name: category[0].name,
+      }
     }
   },
 
