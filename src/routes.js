@@ -4,6 +4,7 @@ import UserController from './controllers/UserController';
 import AuthController from './controllers/AuthController';
 import CategoryController from './controllers/CategoryController';
 import SerieController from './controllers/SerieController';
+import FriendController from './controllers/FriendController';
 
 import authMiddleware from './middlewares/auth';
 
@@ -34,5 +35,9 @@ routes.post('/series', SerieController.create);
 routes.put('/series', SerieController.update);
 routes.delete('/series/:id', SerieController.destroy);
 
+// friend
+routes.get('/friends/:id', FriendController.index);
+routes.post('/friends', FriendController.create);
+routes.delete('/friends', FriendController.destroy);
 
 export default routes;

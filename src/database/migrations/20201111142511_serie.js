@@ -7,7 +7,7 @@ exports.up = function(knex) {
       table.integer('duration').notNullable();
       table.string('title').notNullable();
       table.string('description').notNullable();
-      table.integer('categoryId').notNullable();
+      table.integer('categoryId').notNullable().references('id').inTable('category');
   });
 };
 
