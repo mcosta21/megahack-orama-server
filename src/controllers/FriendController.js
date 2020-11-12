@@ -60,7 +60,7 @@ class FriendController {
   }
 
   static destroy = async (req, res) => {
-    const { id, friendId } = req.body;
+    const { id, friendId } = req.params;
 
     // validate
     const schema = Yup.object().shape({

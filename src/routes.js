@@ -5,6 +5,7 @@ import AuthController from './controllers/AuthController';
 import CategoryController from './controllers/CategoryController';
 import SerieController from './controllers/SerieController';
 import FriendController from './controllers/FriendController';
+import InvestmentController from './controllers/InvestmentController';
 
 import authMiddleware from './middlewares/auth';
 
@@ -38,6 +39,11 @@ routes.delete('/series/:id', SerieController.destroy);
 // friend
 routes.get('/friends/:id', FriendController.index);
 routes.post('/friends', FriendController.create);
-routes.delete('/friends', FriendController.destroy);
+routes.delete('/friends/:id/:friendId', FriendController.destroy);
+
+// investment
+routes.get('/investments/:id', InvestmentController.index);
+routes.post('/investments', InvestmentController.create);
+routes.delete('/investments/:id', InvestmentController.destroy);
 
 export default routes;
