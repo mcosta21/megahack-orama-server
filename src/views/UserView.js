@@ -5,6 +5,7 @@ export default {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      yieldReceived: user.yieldReceived,
     }
   },
 

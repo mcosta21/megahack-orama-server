@@ -15,6 +15,8 @@ const routes = Router();
 routes.get('/users/:id', UserController.show);
 routes.get('/users', UserController.index);
 routes.post('/users', UserController.create);
+routes.put('/users', UserController.update);
+routes.delete('/users/:id', UserController.destroy);
 
 // auth
 routes.post('/auth', AuthController.store);

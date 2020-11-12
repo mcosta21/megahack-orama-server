@@ -80,6 +80,86 @@ class UserController {
 
 		return res.json(UserView.render(newUser));
 	}
+
+	static update = async (req, res) => {
+		const { 
+			id,
+			newFirstName,
+			newLastName,
+			newEmail,
+			newPassword,
+			newYieldReceived,
+		} = req.body;
+
+		// validate
+		const schema = Yup.object().shape({
+			id: Yup.number().required().integer(),
+			newFirstName: Yup.string(),
+			newLastName: Yup.string(),
+			newEmail: Yup.string().email(),
+			newPassword: Yup.string().min(6),
+			newYieldReceived: Yup.number(),
+		});
+
+		if(!(await schema.isValid({ 
+			id,
+			newFirstName,
+			newLastName,
+			newEmail,
+			newPassword,
+			newYieldReceived,
+		}))) {
+			return res.status(400).json({ error: 'Validation failed' });
+		}
+
+		// check if user exists
+		let user = await connection('user').where('id', id).select('id');
+
+		if(user[0] === undefined) {
+			return res.status(204).json();
+		}
+
+		// check what needs to be changed
+		if(newFirstName !== undefined) {
+			user = await connection('user').update('firstName', newFirstName).where('id', id);
+		}
+		if(newLastName !== undefined) {
+			user = await connection('user').update('lastName', newLastName).where('id', id);
+		}
+		if(newEmail !== undefined) {
+			user = await connection('user').update('email', newEmail).where('id', id);
+		}
+		if(newPassword !== undefined) {
+			const passwordHash = bcrypt.hashSync(newPassword, 8); 
+
+			user = await connection('user').update('password', passwordHash).where('id', id);
+		}
+
+		if(newYieldReceived !== undefined) {
+			user = await connection('user').update('yieldReceived', newYieldReceived).where('id', id);
+		}
+
+		return res.status(200).json(user);
+
+	}
+
+	static destroy = async (req, res) => {
+		const { id } = req.params;
+
+		// validate user
+		const schema = Yup.object().shape({
+			id: Yup.number().required().integer(),
+		});
+
+		if(!(await schema.isValid({ id }))) {
+			return res.status(400).json({ error: 'Validation failed' });
+		}
+
+		// delete user
+		await connection('user').where('id', id).del();
+
+    return res.status(202).json({ success: true });
+	}
 }
 
 export default UserController;
