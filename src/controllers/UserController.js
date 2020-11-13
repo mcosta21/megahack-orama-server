@@ -40,6 +40,7 @@ class UserController {
 			email, 
 			password,
 			yieldReceived,
+			admin,
 		} = req.body;
 		
 		// validate received data
@@ -50,6 +51,7 @@ class UserController {
 			password: Yup.string().required().min(6),
 			passwordConfirmation: Yup.string().required().oneOf([Yup.ref('password')]),
 			yieldReceived: Yup.number().required(),
+			admin: Yup.boolean(),
 		});
 
 		if(!(await schema.isValid(req.body))) {
@@ -73,6 +75,7 @@ class UserController {
 			email,
 			password: passwordHash,
 			yieldReceived,
+			admin: admin? true : false,
 		};
 
 		const [ id ] = await connection('user').insert(newUser);
