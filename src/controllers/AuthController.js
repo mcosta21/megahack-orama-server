@@ -23,27 +23,27 @@ class AuthController {
       return res.status(400).json({ error: 'Validation failed' })
     }
 
-    const user = await connection('user').where('email', email).select('*');
+    const [ user ] = await connection('user').where('email', email).select('*');
 
-    if(user[0] === undefined) {
+    if(user === undefined) {
       return res.status(400).json({ error: 'User not found' });
     }
 
     // check password
-    const passwordMatch = bcrypt.compareSync(password, user[0].password);
+    const passwordMatch = bcrypt.compareSync(password, user.password);
 
     if(!passwordMatch) {
       return res.status(400).json({ error: 'Password is incorrect' });
     }
 
     // generate token
-    const { id } = user[0].id;
+    const { id } = user;  
 
     const token = jwt.sign({ id }, authConfig.secret, {
       expiresIn: authConfig.expiresIn,
     });
 
-    return res.json(AuthView.render(user[0], token));
+    return res.json(AuthView.render(user, token));
   }
 }
 

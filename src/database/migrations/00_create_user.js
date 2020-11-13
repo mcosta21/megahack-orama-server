@@ -7,6 +7,7 @@ exports.up = function(knex) {
         table.string('email').notNullable();
         table.string('password').notNullable();
         table.decimal('yieldReceived');
+        table.boolean('admin');
     });
 };
 

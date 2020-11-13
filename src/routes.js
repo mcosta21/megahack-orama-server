@@ -15,8 +15,6 @@ const routes = Router();
 routes.get('/users/:id', UserController.show);
 routes.get('/users', UserController.index);
 routes.post('/users', UserController.create);
-routes.put('/users', UserController.update);
-routes.delete('/users/:id', UserController.destroy);
 
 // auth
 routes.post('/auth', AuthController.store);
@@ -24,27 +22,32 @@ routes.post('/auth', AuthController.store);
 // everything bellow it needs a validation token to work
 routes.use(authMiddleware);
 
+// user
+routes.put('/users', UserController.update);
+routes.delete('/users/', UserController.destroy);
+
 // category
 routes.get('/categories/:id', CategoryController.show);
 routes.get('/categories', CategoryController.index);
 routes.post('/categories', CategoryController.create);
 routes.put('/categories', CategoryController.update);
-routes.delete('/categories/:id', CategoryController.destroy);
+routes.delete('/categories/:categoryId', CategoryController.destroy);
 
 // serie
 routes.get('/series/:id', SerieController.show);
+routes.get('/series/category/:id', SerieController.showByCategory);
 routes.get('/series', SerieController.index);
 routes.post('/series', SerieController.create);
 routes.put('/series', SerieController.update);
-routes.delete('/series/:id', SerieController.destroy);
+routes.delete('/series/:serieId', SerieController.destroy);
 
 // friend
-routes.get('/friends/:id', FriendController.index);
+routes.get('/friends/', FriendController.index);
 routes.post('/friends', FriendController.create);
-routes.delete('/friends/:id/:friendId', FriendController.destroy);
+routes.delete('/friends/:friendId', FriendController.destroy);
 
 // investment
-routes.get('/investments/:id', InvestmentController.index);
+routes.get('/investments/', InvestmentController.index);
 routes.post('/investments', InvestmentController.create);
 routes.delete('/investments/:id', InvestmentController.destroy);
 

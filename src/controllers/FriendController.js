@@ -5,7 +5,7 @@ import FriendView from '../views/FriendView';
 
 class FriendController {
   static index = async (req, res) => {
-    const { id } = req.params;
+    const id = req.userId;
 
     // validate
     const schema = Yup.object().shape({
@@ -23,7 +23,8 @@ class FriendController {
   }
 
   static create = async (req, res) => {
-    const { id, friendId } = req.body;
+    const { friendId } = req.body;
+    const id = req.userId;
 
     // validate
     const schema = Yup.object().shape({
@@ -35,8 +36,15 @@ class FriendController {
       return res.status(400).json({ error: 'Validation failed' });
     }
 
+    // check if friend exists
+    const [ user ] = await connection('user').where('id', friendId).select('id');
+
+    if(!user) {
+      return res.status(400).json({ error: 'Friend does not exist' });
+    }
+
     // check if friendship already exists
-    const friendship = await connection('friend').where({ 
+    const [ friendship ] = await connection('friend').where({ 
       friendOneId: id,
       friendTwoId: friendId,
     }).orWhere({
@@ -44,7 +52,7 @@ class FriendController {
       friendTwoId: id,
     }).select('*');
 
-    if(friendship[0] !== undefined) {
+    if(friendship !== undefined) {
       return res.status(204).json();
     }
 
@@ -60,8 +68,9 @@ class FriendController {
   }
 
   static destroy = async (req, res) => {
-    const { id, friendId } = req.params;
-
+    const { friendId } = req.params;
+    const id = req.userId;
+    
     // validate
     const schema = Yup.object().shape({
       id: Yup.number().required().integer(),
@@ -69,18 +78,6 @@ class FriendController {
     });
 
     if(!(await schema.isValid({ id, friendId }))) {
-      return res.status(204).json();
-    }
-
-    const friends = await connection('friend').select('*').where({
-      friendOneId: id,
-      friendTwoId: friendId,
-    }).orWhere({
-      friendOneId: friendId,
-      friendTwoId: id,
-    });
-
-    if(friends[0] === undefined) {
       return res.status(204).json();
     }
 
