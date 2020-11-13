@@ -34,26 +34,26 @@ class CategoryController {
   static create = async (req, res) => {
     const { name } = req.body;
 
-    // validate
-    const schema = Yup.object().shape({
-      name: Yup.string().required(),
-    });
+    // // validate
+    // const schema = Yup.object().shape({
+    //   name: Yup.string().required(),
+    // });
 
-    if(!(await schema.isValid({ name }))) {
-      return res.status(400).json({ error: 'Category name not valid' });
-    }
+    // if(!(await schema.isValid({ name }))) {
+    //   return res.status(400).json({ error: 'Category name not valid' });
+    // }
 
-    // check if category exists
-		const [ category ] = await connection('category').where('name', name).select('id');
+    // // check if category exists
+		// const [ category ] = await connection('category').where('name', name).select('id');
 
-		if(category !== undefined) {
-			return res.status(400).json({ error: 'Category already exists' });
-    }
+		// if(category !== undefined) {
+		// 	return res.status(400).json({ error: 'Category already exists' });
+    // }
     
-    // create category
-    const [ id ] = await connection('category').insert({ name });
+    // // create category
+    // const [ id ] = await connection('category').insert({ name });
 
-    return res.status(201).json(CategoryView.render(id, name));
+    // return res.status(201).json(CategoryView.render(id, name));
   }
 
   static update = async (req, res) => {

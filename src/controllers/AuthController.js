@@ -37,7 +37,7 @@ class AuthController {
     }
 
     // generate token
-    const { id } = user.id;
+    const { id } = user;  
 
     const token = jwt.sign({ id }, authConfig.secret, {
       expiresIn: authConfig.expiresIn,
