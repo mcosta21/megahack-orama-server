@@ -5,7 +5,7 @@ import InvestmentView from '../views/InvestmentView';
 
 class InvestmentController {
   static index = async (req, res) => {
-    const { id } = req.params;
+    const id = req.userId;
 
     //validate
     const schema = Yup.object().shape({
@@ -16,13 +16,14 @@ class InvestmentController {
       return res.status(400).json({ error: 'Validation failed' });
     }
 
+    // get investments
     const investments = await connection('investment').where('userId', id).select('*');
 
     const data = await Promise.all(investments.map(async (investment) => {
-      const serie = await connection('serie').where('id', investment.serieId).select('title');
+      const [ serie ] = await connection('serie').where('id', investment.serieId).select('title');
       return {
         id: investment.id,
-        serieTitle: serie[0].title,
+        serieTitle: serie.title,
         startDate: investment.startDate,
         expirationDate: investment.expirationDate,
         private: investment.private,
@@ -34,7 +35,8 @@ class InvestmentController {
   }
 
   static create = async (req, res) => {
-    const { expirationDate, privateBool, userId, serieId } = req.body;
+    const { expirationDate, privateBool, serieId } = req.body;
+    const userId = req.userId;
 
     // validate
     const schema = Yup.object().shape({
@@ -90,17 +92,22 @@ class InvestmentController {
 
   static destroy = async (req, res) => {
     const { id } = req.params;
+    const userId = req.userId;
 
     // validate
     const schema = Yup.object().shape({
       id: Yup.number().required().integer(),
+      userId: Yup.number().required().integer(),
     });
 
-    if(!(await schema.isValid({ id }))) {
+    if(!(await schema.isValid({ id, userId }))) {
       return res.status(204).json();
     }
 
-    await connection('investment').where('id', id).del();
+    await connection('investment').where({
+      id,
+      userId,
+    }).del();
 
     return res.status(202).json({ success: true });
   }

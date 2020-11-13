@@ -85,13 +85,13 @@ class UserController {
 
 	static update = async (req, res) => {
 		const { 
-			id,
 			newFirstName,
 			newLastName,
 			newEmail,
 			newPassword,
 			newYieldReceived,
 		} = req.body;
+		const id = req.userId;
 
 		// validate
 		const schema = Yup.object().shape({
@@ -114,12 +114,7 @@ class UserController {
 			return res.status(400).json({ error: 'Validation failed' });
 		}
 
-		// check if user exists
-		let user = await connection('user').where('id', id).select('id');
-
-		if(user[0] === undefined) {
-			return res.status(204).json();
-		}
+		let user;
 
 		// check what needs to be changed
 		if(newFirstName !== undefined) {
@@ -141,12 +136,14 @@ class UserController {
 			user = await connection('user').update('yieldReceived', newYieldReceived).where('id', id);
 		}
 
-		return res.status(200).json(user);
+		[ user ] = await connection('user').where('id', id).select('*');
+		
+		return res.status(200).json(UserView.render(user));
 
 	}
 
 	static destroy = async (req, res) => {
-		const { id } = req.params;
+		const id = req.userId;
 
 		// validate user
 		const schema = Yup.object().shape({
