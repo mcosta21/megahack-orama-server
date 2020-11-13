@@ -26,6 +26,14 @@ class SerieController {
     return res.status(200).json(await SerieView.render(serie));
   }
 
+  static showByCategory = async (req, res) => {
+    const { id } = req.params;
+
+    const series = await connection('serie').where('categoryId', id).select('*');
+
+    return res.status(200).json(await Promise.all(SerieView.renderMany(series)));
+  }
+
   static index = async (req, res) => {
     const series = await connection('serie').select('*');
     return res.status(200).json(await Promise.all(SerieView.renderMany(series)));

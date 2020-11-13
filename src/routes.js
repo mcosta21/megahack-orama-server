@@ -35,6 +35,7 @@ routes.delete('/categories/:categoryId', CategoryController.destroy);
 
 // serie
 routes.get('/series/:id', SerieController.show);
+routes.get('/series/category/:id', SerieController.showByCategory);
 routes.get('/series', SerieController.index);
 routes.post('/series', SerieController.create);
 routes.put('/series', SerieController.update);
