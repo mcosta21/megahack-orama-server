@@ -5,7 +5,7 @@ import FriendView from '../views/FriendView';
 
 class FriendController {
   static index = async (req, res) => {
-    const { id } = req.params;
+    const id = req.userId;
 
     // validate
     const schema = Yup.object().shape({
@@ -23,7 +23,8 @@ class FriendController {
   }
 
   static create = async (req, res) => {
-    const { id, friendId } = req.body;
+    const { friendId } = req.body;
+    const id = req.userId;
 
     // validate
     const schema = Yup.object().shape({
@@ -33,6 +34,13 @@ class FriendController {
 
     if(!(await schema.isValid({ id, friendId }))) {
       return res.status(400).json({ error: 'Validation failed' });
+    }
+
+    // check if friend exists
+    const [ user ] = await connection('user').where('id', friendId).select('id');
+
+    if(!user) {
+      return res.status(400).json({ error: 'Friend does not exist' });
     }
 
     // check if friendship already exists
@@ -60,8 +68,9 @@ class FriendController {
   }
 
   static destroy = async (req, res) => {
-    const { id, friendId } = req.params;
-
+    const { friendId } = req.params;
+    const id = req.userId;
+    
     // validate
     const schema = Yup.object().shape({
       id: Yup.number().required().integer(),

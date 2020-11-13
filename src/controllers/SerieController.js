@@ -40,6 +40,7 @@ class SerieController {
       description,
       categoryId,
     } = req.body;
+    const id = req.userId;
 
     // validate
     const schema = Yup.object().shape({
@@ -49,6 +50,7 @@ class SerieController {
       title: Yup.string().required(),
       description: Yup.string().required(),
       categoryId: Yup.number().required().integer(),
+      id: Yup.number().required().integer(),
     });
 
     if(!(await schema.isValid({ 
@@ -58,9 +60,17 @@ class SerieController {
       title,
       description,
       categoryId,
-     }))) {
-      return res.status(400).json({ error: 'Validation failed' });  
-     }
+      id,
+    }))) {
+    return res.status(400).json({ error: 'Validation failed' });  
+    }
+
+    // check if user is an admin
+    const [ user ] = await connection('user').where('id', id).select('admin');
+
+    if(user.admin === 0) {
+      return res.status(400).json({ error: 'User is not an admin' });
+    }
 
     // check if serie exists
     const [ serie ] = await connection('serie').where('title', title).select('*');
@@ -85,10 +95,10 @@ class SerieController {
       categoryId,
 		};
 
-    const [ id ] = await connection('serie').insert(newSerie);
+    const serieId = await connection('serie').insert(newSerie);
     
     const createdSerie = {
-      id,
+      serieId,
       ...newSerie,
     }
 
@@ -97,7 +107,7 @@ class SerieController {
 
   static update = async (req, res) => {
     const { 
-      id, 
+      serieId, 
       newCost,
       newYield,
       newDuration,
@@ -105,32 +115,42 @@ class SerieController {
       newDescription,
       newCategoryId,
     } = req.body;
+    const id = req.userId;
 
     // validate
     const schema = Yup.object().shape({
-      id: Yup.number().required().integer(),
+      serieId: Yup.number().required().integer(),
       newCost: Yup.number(),
       newYield: Yup.number(),
       newDuration: Yup.number(),
       newTitle: Yup.string(),
       newDescription: Yup.string(),
       newCategoryId: Yup.number().integer(),
+      id: Yup.number().required().integer(),
     });
 
     if(!(await schema.isValid({ 
-      id, 
+      serieId, 
       newCost,
       newYield,
       newDuration,
       newTitle,
       newDescription,
       newCategoryId,
+      id,
     }))) {
       return res.status(400).json({ error: 'Validation failed' });
     }
 
+    // check if user is an admin
+    const [ user ] = await connection('user').where('id', id).select('admin');
+
+    if(user.admin === 0) {
+      return res.status(400).json({ error: 'User is not an admin' });
+    }
+
     // get serie
-    const [ serie ] = await connection('serie').where('id', id).select('*');
+    const [ serie ] = await connection('serie').where('id', serieId).select('*');
     
     if(serie === undefined) {
       return res.status(400).json({ result: 'Serie not found' });
@@ -138,19 +158,19 @@ class SerieController {
 
     // check what is meant to be updated and update it
     if(newCost) {
-      await connection('serie').update({ cost: newCost }).where('id', id);
+      await connection('serie').update({ cost: newCost }).where('id', serieId);
     }
     if(newYield) {
-      await connection('serie').update({ yield: newYield }).where('id', id);
+      await connection('serie').update({ yield: newYield }).where('id', serieId);
     }
     if(newDuration) {
-      await connection('serie').update({ duration: newDuration }).where('id', id);
+      await connection('serie').update({ duration: newDuration }).where('id', serieId);
     }
     if(newTitle) {
-      await connection('serie').update({ title: newTitle }).where('id', id);
+      await connection('serie').update({ title: newTitle }).where('id', serieId);
     }
     if(newDescription) {
-      await connection('serie').update({ description: newDescription }).where('id', id);
+      await connection('serie').update({ description: newDescription }).where('id', serieId);
     }
     if(newCategoryId) {
       // check if id is valid
@@ -161,28 +181,37 @@ class SerieController {
         return res.status(400).json({ error: 'Category not found' });
       }
       
-      await connection('serie').update({ categoryId: newCategoryId }).where('id', id);
+      await connection('serie').update({ categoryId: newCategoryId }).where('id', serieId);
     }
 
     // get updated serie
-    const [ updatedSerie ] = await connection('serie').where('id', id).select('*');
+    const [ updatedSerie ] = await connection('serie').where('id', serieId).select('*');
 
     return res.status(200).json(await SerieView.render(updatedSerie));
   }
 
   static destroy = async (req, res) => {
-    const { id } = req.params;
+    const { serieId } = req.params;
+    const id = req.userId;
 
     // validate
     const schema = Yup.object().shape({
+      serieId: Yup.number().required().integer(),
       id: Yup.number().required().integer(),
     });
 
-    if(!(await schema.isValid({ id }))) {
+    if(!(await schema.isValid({ serieId, id }))) {
       return res.status(400).json({ error: 'Validation failed' });
     }
 
-    await connection('serie').where('id', id).del();
+    // check if user is an admin
+    const [ user ] = await connection('user').where('id', id).select('admin');
+
+    if(user.admin === 0) {
+      return res.status(400).json({ error: 'User is not an admin' });
+    }
+
+    await connection('serie').where('id', serieId).del();
 
     return res.status(202).json({ success: true });
   }
