@@ -16,13 +16,13 @@ class CategoryController {
     }
 
     // search
-    const category = await connection('category').where('id', id).select('*');
+    const [ category ] = await connection('category').where('id', id).select('*');
 
-		if(category[0] === undefined) {
+		if(category === undefined) {
 			return res.status(400).json({ error: 'Category does not exist' });
     }
 
-    return res.status(200).json(CategoryView.render(category[0].id, category[0].name));
+    return res.status(200).json(CategoryView.render(category.id, category.name));
   }
 
   static index = async (req, res) => {
@@ -44,9 +44,9 @@ class CategoryController {
     }
 
     // check if category exists
-		const category = await connection('category').where('name', name).select('*');
+		const [ category ] = await connection('category').where('name', name).select('id');
 
-		if(category[0] !== undefined) {
+		if(category !== undefined) {
 			return res.status(400).json({ error: 'Category already exists' });
     }
     
@@ -57,26 +57,22 @@ class CategoryController {
   }
 
   static update = async (req, res) => {
-    const { id, name, newName } = req.body;
+    const { id, newName } = req.body;
 
     // validate
     const schema = Yup.object().shape({
       id: Yup.number().required().integer(),
-      name: Yup.string().required(),
       newName: Yup.string().required(),
     });
 
-    if(!(await schema.isValid({ id, name, newName }))) {
+    if(!(await schema.isValid({ id, newName }))) {
       return res.status(400).json({ error: 'Validation failed' });
     }
 
     // get category
-    const category = await connection('category').where({
-      id,
-      name,
-    }).select('*');
+    const [ category ] = await connection('category').where('id', id).select('*');
 
-    if(category[0] === undefined) {
+    if(category === undefined) {
       return res.status(204).json({ result: 'Category not found' });
     }
 

@@ -49,19 +49,19 @@ class InvestmentController {
     }
 
     // check if investment exists
-    const investment = await connection('investment').where({
+    const [ investment ] = await connection('investment').where({
       userId,
       serieId,
     }).select('private');
 
-    if(investment[0] !== undefined) {
+    if(investment !== undefined) {
       return res.status(400).json({ error: 'Investment already exists' });
     }
 
     // check if serie exists
-    const serie = await connection('serie').where('id', serieId).select('title');
+    const [ serie ] = await connection('serie').where('id', serieId).select('title');
 
-    if(serie[0] === undefined) {
+    if(serie === undefined) {
       return res.status(400).json({ error: 'Serie not found'});
     }
 
@@ -78,7 +78,7 @@ class InvestmentController {
 
     const data = {
       id,
-      serieTitle: serie[0].title,
+      serieTitle: serie.title,
       startDate: newInvestment.startDate,
       expirationDate: newInvestment.expirationDate,
       private: newInvestment.private,

@@ -13,17 +13,17 @@ class SerieController {
     });
 
     if(!(await schema.isValid({ id }))) {
-      return res.status(400).json({ error: 'Category id is not valid' });
+      return res.status(400).json({ error: 'Validation failed' });
     }
 
     // get serie
-    const serie = await connection('serie').where('id', id).select('*');
+    const [ serie ] = await connection('serie').where('id', id).select('*');
     
-    if(serie[0] === undefined) {
+    if(serie === undefined) {
       return res.status(400).json({ error: 'Serie not found' });
     }
 
-    return res.status(200).json(await SerieView.render(serie[0]));
+    return res.status(200).json(await SerieView.render(serie));
   }
 
   static index = async (req, res) => {
@@ -63,16 +63,16 @@ class SerieController {
      }
 
     // check if serie exists
-    const serie = await connection('serie').where('title', title).select('*');
+    const [ serie ] = await connection('serie').where('title', title).select('*');
 
-    if(serie[0] !== undefined) {
+    if(serie !== undefined) {
       return res.status(400).json({ error: 'Serie already exists '});
     }
 
     // check if category exists
-    const category = await connection('category').where('id', categoryId).select('id');
+    const [ category ] = await connection('category').where('id', categoryId).select('id');
     
-    if(category[0] === undefined) {
+    if(category === undefined) {
       return res.status(400).json({ error: 'Category not found' });
     }
 
@@ -130,9 +130,9 @@ class SerieController {
     }
 
     // get serie
-    const serie = await connection('serie').where('id', id).select('*');
+    const [ serie ] = await connection('serie').where('id', id).select('*');
     
-    if(serie[0] === undefined) {
+    if(serie === undefined) {
       return res.status(400).json({ result: 'Serie not found' });
     }
 
@@ -154,9 +154,10 @@ class SerieController {
     }
     if(newCategoryId) {
       // check if id is valid
-      const category = await connection('category').where('id', newCategoryId).select('*');
+      const [ category ] = await connection('category').where('id', newCategoryId)
+      .select('id');
 
-      if(category[0] === undefined) {
+      if(category === undefined) {
         return res.status(400).json({ error: 'Category not found' });
       }
       
@@ -164,9 +165,9 @@ class SerieController {
     }
 
     // get updated serie
-    const updatedSerie = await connection('serie').where('id', id).select('*');
+    const [ updatedSerie ] = await connection('serie').where('id', id).select('*');
 
-    return res.status(200).json(await SerieView.render(updatedSerie[0]));
+    return res.status(200).json(await SerieView.render(updatedSerie));
   }
 
   static destroy = async (req, res) => {

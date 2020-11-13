@@ -19,14 +19,13 @@ class UserController {
 		}
 
 		// get user from database
-		const user = await connection('user')
-												.where('id', id)
-												.select('*');
+		const [ user ] = await connection('user').where('id', id).select('*');
 
-		if(user[0] === undefined) {
+		if(user === undefined) {
 			return res.status(400).json({ error: 'User not found' });
 		}
-		return res.status(200).json(UserView.render(user[0]));
+
+		return res.status(200).json(UserView.render(user));
 	}
 
 	static index = async (req, res) => {
@@ -40,7 +39,7 @@ class UserController {
 			lastName, 
 			email, 
 			password,
-			yieldReceived
+			yieldReceived,
 		} = req.body;
 		
 		// validate received data
@@ -58,9 +57,9 @@ class UserController {
 		}
 
 		// check if user exists
-		const user = await connection('user').where('email', email).select('*');
+		const [ user ] = await connection('user').where('email', email).select('id');
 
-		if(user[0] !== undefined) {
+		if(user !== undefined) {
 			return res.status(400).json({ error: 'User already exists' });
 		}
 

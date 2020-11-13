@@ -36,7 +36,7 @@ class FriendController {
     }
 
     // check if friendship already exists
-    const friendship = await connection('friend').where({ 
+    const [ friendship ] = await connection('friend').where({ 
       friendOneId: id,
       friendTwoId: friendId,
     }).orWhere({
@@ -44,7 +44,7 @@ class FriendController {
       friendTwoId: id,
     }).select('*');
 
-    if(friendship[0] !== undefined) {
+    if(friendship !== undefined) {
       return res.status(204).json();
     }
 
@@ -69,18 +69,6 @@ class FriendController {
     });
 
     if(!(await schema.isValid({ id, friendId }))) {
-      return res.status(204).json();
-    }
-
-    const friends = await connection('friend').select('*').where({
-      friendOneId: id,
-      friendTwoId: friendId,
-    }).orWhere({
-      friendOneId: friendId,
-      friendTwoId: id,
-    });
-
-    if(friends[0] === undefined) {
       return res.status(204).json();
     }
 
