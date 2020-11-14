@@ -78,6 +78,8 @@ class InvestmentController {
       return res.status(203).json({ message: 'Série não encontrada.' });
     }
 
+    const trx = await connection.transaction();
+
     //create investment
     const newInvestment = {
       startDate: new Date(),
@@ -87,7 +89,9 @@ class InvestmentController {
       serieId,
     }
 
-    const [ id ] = await connection('investment').insert(newInvestment);
+    const [ id ] = await trx('investment').insert(newInvestment);
+
+    await trx.commit();
 
     const data = {
       id,
@@ -126,10 +130,15 @@ class InvestmentController {
       return res.status(203).json(validation);
     }
 
-    await connection('investment').where({
+    const trx = await connection.transaction();
+
+    // delete investment
+    await trx('investment').where({
       id,
       userId,
     }).del();
+
+    await trx.commit();
 
     return res.status(200).json({ message: 'Investimento removido.' });
   }

@@ -50,6 +50,7 @@ class UserController {
 			lastName, 
 			email, 
 			password,
+			passwordConfirmation,
 			yieldReceived,
 			admin,
 		} = req.body;
@@ -108,7 +109,11 @@ class UserController {
 			admin: admin? true : false,
 		};
 
-		const [ id ] = await connection('user').insert(newUser);
+		const trx = await connection.transaction();
+
+		const [ id ] = await trx('user').insert(newUser);
+
+		await trx.commit();
 
 		return res.status(201).json(UserView.render(newUser));
 	}
@@ -157,30 +162,33 @@ class UserController {
 
 		let user;
 
-		// check what needs to be changed
+		const trx = await connection.transaction();
+
+		// check what needs to be changed and update
 		if(newFirstName !== undefined) {
-			user = await connection('user').update('firstName', newFirstName).where('id', id);
+			user = await trx('user').update('firstName', newFirstName).where('id', id);
 		}
 		if(newLastName !== undefined) {
-			user = await connection('user').update('lastName', newLastName).where('id', id);
+			user = await trx('user').update('lastName', newLastName).where('id', id);
 		}
 		if(newEmail !== undefined) {
-			user = await connection('user').update('email', newEmail).where('id', id);
+			user = await trx('user').update('email', newEmail).where('id', id);
 		}
 		if(newPassword !== undefined) {
 			const passwordHash = bcrypt.hashSync(newPassword, 8); 
 
-			user = await connection('user').update('password', passwordHash).where('id', id);
+			user = await trx('user').update('password', passwordHash).where('id', id);
 		}
 
 		if(newYieldReceived !== undefined) {
-			user = await connection('user').update('yieldReceived', newYieldReceived).where('id', id);
+			user = await trx('user').update('yieldReceived', newYieldReceived).where('id', id);
 		}
 
-		[ user ] = await connection('user').where('id', id).select('*');
+		[ user ] = await trx('user').where('id', id).select('*');
+
+		await trx.commit();
 		
 		return res.status(200).json(UserView.render(user));
-
 	}
 
 	static destroy = async (req, res) => {
@@ -206,8 +214,12 @@ class UserController {
       return res.status(203).json(validation);
     }
 
+		const trx = await connection.transaction();
+
 		// delete user
-		await connection('user').where('id', id).del();
+		await trx('user').where('id', id).del();
+
+		await trx.commit();
 
     return res.status(202).json({ message: 'Usuário removido' });
 	}

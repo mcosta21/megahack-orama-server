@@ -112,13 +112,22 @@ class PostController {
       investmentId,
       userId,
     }
+
+    const trx = await connection.transaction();
     
-    const [ id ] = await connection('post').insert(postData);
+    const [ id ] = await trx('post').insert(postData);
     
     // add post id into investment
-    await connection('investment').update('postId', id).where('id', investmentId);
+    await trx('investment').update('postId', id).where('id', investmentId);
 
-    return res.status(201).json(postData);
+    await trx.commit();
+
+    const newPost = {
+      id,
+      ...postData,
+    }
+
+    return res.status(201).json(newPost);
   }
 
   static destroy = async (req, res) => {
@@ -149,7 +158,11 @@ class PostController {
     const [ investment ] = await connection('investment').where('userId', userId)
       .select('id');
 
-    await connection('post').where('investmentId', investment.id).del();
+    const trx = await connection.transaction();
+
+    await trx('post').where('investmentId', investment.id).del();
+
+    await trx.commit();
 
     return res.status(200).json({ message: 'Post removido.' });
   }
