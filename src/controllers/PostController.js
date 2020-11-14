@@ -50,7 +50,7 @@ class PostController {
           .select('serieId');
 
         const [ serie ] = await connection('serie').where('id', investment.serieId)
-          .select('title', 'description', 'categoryId');
+          .select('id', 'title', 'description', 'categoryId');
           
         const [ category ] = await connection('category').where('id', serie.categoryId)
           .select('name');
@@ -89,7 +89,7 @@ class PostController {
       investmentId: Yup.number(),
     });
 
-    const values = { id };
+    const values = { title, description, investmentId };
 
     if(!(await schema.isValid(values))) {
       const validation = await schema.validate(values, { abortEarly: false })

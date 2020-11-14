@@ -71,16 +71,6 @@ class InvestmentController {
       return res.status(203).json(validation);
     }
 
-    // check if investment exists
-    const [ investment ] = await connection('investment').where({
-      userId,
-      serieId,
-    }).select('private');
-
-    if(investment !== undefined) {
-      return res.status(203).json({ message: 'Investimento já existe.' });
-    }
-
     // check if serie exists
     const [ serie ] = await connection('serie').where('id', serieId).select('title');
 
