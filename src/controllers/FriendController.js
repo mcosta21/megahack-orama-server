@@ -36,6 +36,10 @@ class FriendController {
       return res.status(400).json({ error: 'Validation failed' });
     }
 
+    if(id === friendId) {
+      return res.status(400).json({ error: 'You can not become friends with yourself' });
+    }
+
     // check if friend exists
     const [ user ] = await connection('user').where('id', friendId).select('id');
 

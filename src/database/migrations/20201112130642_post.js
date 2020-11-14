@@ -4,6 +4,8 @@ exports.up = function(knex) {
     table.date('datePost').notNullable();
     table.string('title').notNullable();
     table.string('description').notNullable();
+    table.integer('investmentId').references('id').inTable('investment');
+    table.integer('userId').references('id').inTable('user');
   });
 };
 
