@@ -9,11 +9,21 @@ class InvestmentController {
 
     //validate
     const schema = Yup.object().shape({
-      id: Yup.number().required().integer(),
+      id: Yup.number().required().integer('Usuário inválido'),
     });
 
-    if(!(await schema.isValid({ id }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // get investments
@@ -42,12 +52,23 @@ class InvestmentController {
     const schema = Yup.object().shape({
       expirationDate: Yup.date().required(),
       privateBool: Yup.boolean().required(),
-      userId: Yup.number().required().integer(),
-      serieId: Yup.number().required().integer(),
+      userId: Yup.number().required().integer('Usuário inválido.'),
+      serieId: Yup.number().required().integer('Série inválida.'),
     });
  
-    if(!(await schema.isValid({ expirationDate, privateBool, userId, serieId }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { expirationDate, privateBool, userId, serieId };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        console.log(errors);
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // check if investment exists
@@ -57,14 +78,14 @@ class InvestmentController {
     }).select('private');
 
     if(investment !== undefined) {
-      return res.status(400).json({ error: 'Investment already exists' });
+      return res.status(203).json({ message: 'Investimento já existe.' });
     }
 
     // check if serie exists
     const [ serie ] = await connection('serie').where('id', serieId).select('title');
 
     if(serie === undefined) {
-      return res.status(400).json({ error: 'Serie not found'});
+      return res.status(203).json({ message: 'Série não encontrada.' });
     }
 
     //create investment
@@ -96,12 +117,23 @@ class InvestmentController {
 
     // validate
     const schema = Yup.object().shape({
-      id: Yup.number().required().integer(),
-      userId: Yup.number().required().integer(),
+      id: Yup.number().required().integer('Investimento inválido.'),
+      userId: Yup.number().required().integer('Usuário inválido.'),
     });
 
-    if(!(await schema.isValid({ id, userId }))) {
-      return res.status(204).json();
+    const values = { id, userId };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     await connection('investment').where({
@@ -109,7 +141,7 @@ class InvestmentController {
       userId,
     }).del();
 
-    return res.status(202).json({ success: true });
+    return res.status(200).json({ message: 'Investimento removido.' });
   }
 }
 

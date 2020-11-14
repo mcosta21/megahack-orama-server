@@ -8,7 +8,7 @@ class PostController {
     const [ post ] = await connection('post').where('id', id).select('*');
 
     if(post === undefined) {
-      return res.status(400).json({ error: 'Post not found' });
+      return res.status(204).json({ message: 'Post não encontrado.' });
     }
 
     // if there is no investment
@@ -84,13 +84,24 @@ class PostController {
 
     // validate
     const schema = Yup.object().shape({
-      title: Yup.string().required(),
-      description: Yup.string(),
+      title: Yup.string().required('Título inválido.'),
+      description: Yup.string('Descrição inválida.'),
       investmentId: Yup.number(),
     });
 
-    if(!(await schema.isValid({ title, description, investmentId }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // create post
@@ -116,11 +127,22 @@ class PostController {
 
     // validate
     const schema = Yup.object().shape({
-      id: Yup.number().required().integer(),
+      id: Yup.number().required().integer('Post inválido.'),
     });
 
-    if(!(await schema.isValid({ id }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // get investment
@@ -129,7 +151,7 @@ class PostController {
 
     await connection('post').where('investmentId', investment.id).del();
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ message: 'Post removido.' });
   }
 }
 

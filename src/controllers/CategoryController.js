@@ -8,18 +8,27 @@ class CategoryController {
 
     // validate
     const schema = Yup.object().shape({
-      id: Yup.number().required().integer(),
+      id: Yup.number().required()
+      .integer('É preciso enviar um número inteiro.'),
     });
 
     if(!(await schema.isValid({ id }))) {
-      return res.status(400).json({ error: 'Category id is not valid' });
+      const validation = await schema.validate({ id }, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // search
     const [ category ] = await connection('category').where('id', id).select('*');
 
 		if(category === undefined) {
-			return res.status(400).json({ error: 'Category does not exist' });
+			return res.status(203).json({ message: 'Categoria não encontrada.' });
     }
 
     return res.status(200).json(CategoryView.render(category.id, category.name));
@@ -37,26 +46,36 @@ class CategoryController {
 
     // validate
     const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      id: Yup.number().required().integer(),
+      name: Yup.string().required('Nome inválido.'),
+      id: Yup.number().required().integer('Usuário inválido.'),
     });
 
-    if(!(await schema.isValid({ name, id }))) {
-      return res.status(400).json({ error: 'Category name not valid' });
+    const values = { name, id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // check if user is an admin
     const [ user ] = await connection('user').where('id', id).select('admin');
 
     if(user.admin === 0) {
-      return res.status(400).json({ error: 'User is not an admin' });
+      return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
     // check if category exists
 		const [ category ] = await connection('category').where('name', name).select('id');
 
 		if(category !== undefined) {
-			return res.status(400).json({ error: 'Category already exists' });
+			return res.status(203).json({ error: 'Categoria já existe.' });
     }
     
     // create category
@@ -71,27 +90,37 @@ class CategoryController {
 
     // validate
     const schema = Yup.object().shape({
-      categoryId: Yup.number().required().integer(),
-      newName: Yup.string().required(),
-      id: Yup.number().required().integer(),
+      categoryId: Yup.number().required().integer('Categoria invalida.'),
+      newName: Yup.string().required('O novo nome da categoria deve ser um texto.'),
+      id: Yup.number().required().integer('Usuário inválido.'),
     });
 
-    if(!(await schema.isValid({ categoryId, newName, id }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { categoryId, newName, id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // check if user is an admin
     const [ user ] = await connection('user').where('id', id).select('admin');
 
     if(user.admin === 0) {
-      return res.status(400).json({ error: 'User is not an admin' });
+      return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
     // get category
     const [ category ] = await connection('category').where('id', categoryId).select('*');
 
     if(category === undefined) {
-      return res.status(204).json({ result: 'Category not found' });
+      return res.status(203).json({ message: 'Categoria não encontrada.' });
     }
 
     // update category name
@@ -106,24 +135,34 @@ class CategoryController {
 
     // validate
     const schema = Yup.object().shape({
-      categoryId: Yup.number().required().integer(),
-      id: Yup.number().required().integer(),
+      categoryId: Yup.number().required().integer('Categoria inválida.'),
+      id: Yup.number().required().integer('Usuário inválido.'),
     });
 
-    if(!(await schema.isValid({ categoryId, id }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { categoryId, id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // check if user is an admin
     const [ user ] = await connection('user').where('id', id).select('admin');
 
     if(user.admin === 0) {
-      return res.status(400).json({ error: 'User is not an admin' });
+      return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
     await connection('category').where('id', categoryId).del();
 
-    return res.status(202).json({ success: true });
+    return res.status(200).json({ message: 'Categoria removida.' });
   }
 }
 

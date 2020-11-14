@@ -11,18 +11,29 @@ class UserController {
 
 		// validate params
 		const schema = Yup.object().shape({
-			id: Yup.number().required().integer(),
+			id: Yup.number().required().integer('Usuário inválido.'),
 		});
 
-		if(!(await schema.isValid({ id }))) {
-			return res.status(400).json({ error: 'Id not valid' });
-		}
+		const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
+    }
 
 		// get user from database
 		const [ user ] = await connection('user').where('id', id).select('*');
 
 		if(user === undefined) {
-			return res.status(400).json({ error: 'User not found' });
+			return res.status(203).json({ message: 'Usuário não encontrado.' });
 		}
 
 		return res.status(200).json(UserView.render(user));
@@ -45,24 +56,43 @@ class UserController {
 		
 		// validate received data
 		const schema = Yup.object().shape({
-			firstName: Yup.string().required(),
-			lastName: Yup.string().required(),
-			email: Yup.string().email().required(),
-			password: Yup.string().required().min(6),
-			passwordConfirmation: Yup.string().required().oneOf([Yup.ref('password')]),
-			yieldReceived: Yup.number().required(),
+			firstName: Yup.string().required('Nome inválido.'),
+			lastName: Yup.string().required('Sobrenome inválido.'),
+			email: Yup.string().email('E-mail inválido.').required('E-mail não informado.'),
+			password: Yup.string().required('Senha inválida.').min(6),
+			passwordConfirmation: Yup.string().required('Senha inválida.').oneOf([Yup.ref('password')]),
+			yieldReceived: Yup.number().required('Valor de rendimento inválido.'),
 			admin: Yup.boolean(),
 		});
 
-		if(!(await schema.isValid(req.body))) {
-			return res.status(400).json({ error: 'Validation failed' });
-		}
+		const values = { 
+			firstName,
+			lastName,
+			email,
+			password,
+			passwordConfirmation,
+			yieldReceived,
+			admin,
+    };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
+    }
 
 		// check if user exists
 		const [ user ] = await connection('user').where('email', email).select('id');
 
 		if(user !== undefined) {
-			return res.status(400).json({ error: 'User already exists' });
+			return res.status(203).json({ message: 'Usuário já existe.' });
 		}
 
 		// hash password
@@ -80,7 +110,7 @@ class UserController {
 
 		const [ id ] = await connection('user').insert(newUser);
 
-		return res.json(UserView.render(newUser));
+		return res.status(201).json(UserView.render(newUser));
 	}
 
 	static update = async (req, res) => {
@@ -95,24 +125,35 @@ class UserController {
 
 		// validate
 		const schema = Yup.object().shape({
-			id: Yup.number().required().integer(),
-			newFirstName: Yup.string(),
-			newLastName: Yup.string(),
-			newEmail: Yup.string().email(),
+			id: Yup.number().required().integer('Usuário inválido.'),
+			newFirstName: Yup.string('Nome inválido.'),
+			newLastName: Yup.string('Sobrenome inválido.'),
+			newEmail: Yup.string().email('E-mail inválido.'),
 			newPassword: Yup.string().min(6),
-			newYieldReceived: Yup.number(),
+			newYieldReceived: Yup.number('Valor de rendimento inválido.'),
 		});
 
-		if(!(await schema.isValid({ 
+		const values = { 
 			id,
 			newFirstName,
 			newLastName,
 			newEmail,
 			newPassword,
 			newYieldReceived,
-		}))) {
-			return res.status(400).json({ error: 'Validation failed' });
-		}
+    };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
+    }
 
 		let user;
 
@@ -147,17 +188,28 @@ class UserController {
 
 		// validate user
 		const schema = Yup.object().shape({
-			id: Yup.number().required().integer(),
+			id: Yup.number().required().integer('Usuário inválido.'),
 		});
 
-		if(!(await schema.isValid({ id }))) {
-			return res.status(400).json({ error: 'Validation failed' });
-		}
+		const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
+    }
 
 		// delete user
 		await connection('user').where('id', id).del();
 
-    return res.status(202).json({ success: true });
+    return res.status(202).json({ message: 'Usuário removido' });
 	}
 }
 

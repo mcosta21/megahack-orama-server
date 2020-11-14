@@ -9,18 +9,29 @@ class SerieController {
 
     // validate
     const schema = Yup.object().shape({
-      id: Yup.number().required().integer(),
+      id: Yup.number().required().integer('Série inválida.'),
     });
 
-    if(!(await schema.isValid({ id }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // get serie
     const [ serie ] = await connection('serie').where('id', id).select('*');
     
     if(serie === undefined) {
-      return res.status(400).json({ error: 'Serie not found' });
+      return res.status(203).json({ message: 'Série não encontrada.' });
     }
 
     return res.status(200).json(await SerieView.render(serie));
@@ -52,16 +63,16 @@ class SerieController {
 
     // validate
     const schema = Yup.object().shape({
-      cost: Yup.number().required(),
-      yieldValue: Yup.number().required(),
-      duration: Yup.number().required(),
-      title: Yup.string().required(),
-      description: Yup.string().required(),
-      categoryId: Yup.number().required().integer(),
-      id: Yup.number().required().integer(),
+      cost: Yup.number().required('Custo inválido.'),
+      yieldValue: Yup.number().required('Valor de rendimento inválido.'),
+      duration: Yup.number().required('Duração inválida.'),
+      title: Yup.string().required('Título inválido.'),
+      description: Yup.string().required('Descrição inválida.'),
+      categoryId: Yup.number().required().integer('Categoria inválida.'),
+      id: Yup.number().required().integer('Usuário inválido.'),
     });
 
-    if(!(await schema.isValid({ 
+    const values = { 
       cost,
       yieldValue,
       duration,
@@ -69,29 +80,40 @@ class SerieController {
       description,
       categoryId,
       id,
-    }))) {
-    return res.status(400).json({ error: 'Validation failed' });  
+    };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // check if user is an admin
     const [ user ] = await connection('user').where('id', id).select('admin');
 
     if(user.admin === 0) {
-      return res.status(400).json({ error: 'User is not an admin' });
+      return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
     // check if serie exists
     const [ serie ] = await connection('serie').where('title', title).select('*');
 
     if(serie !== undefined) {
-      return res.status(400).json({ error: 'Serie already exists '});
+      return res.status(203).json({ message: 'Série já existe.'});
     }
 
     // check if category exists
     const [ category ] = await connection('category').where('id', categoryId).select('id');
     
     if(category === undefined) {
-      return res.status(400).json({ error: 'Category not found' });
+      return res.status(203).json({ message: 'Categoria não encontrada.' });
     }
 
     const newSerie = {
@@ -127,18 +149,18 @@ class SerieController {
 
     // validate
     const schema = Yup.object().shape({
-      serieId: Yup.number().required().integer(),
+      serieId: Yup.number().required().integer('Série inválida.'),
       newCost: Yup.number(),
       newYield: Yup.number(),
       newDuration: Yup.number(),
-      newTitle: Yup.string(),
+      newTitle: Yup.string('Título inválido.'),
       newDescription: Yup.string(),
-      newCategoryId: Yup.number().integer(),
-      id: Yup.number().required().integer(),
+      newCategoryId: Yup.number().integer('Categoria inválida.'),
+      id: Yup.number().required().integer('Usuário inválido.'),
     });
 
-    if(!(await schema.isValid({ 
-      serieId, 
+    const values = { 
+      serieId,
       newCost,
       newYield,
       newDuration,
@@ -146,22 +168,33 @@ class SerieController {
       newDescription,
       newCategoryId,
       id,
-    }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // check if user is an admin
     const [ user ] = await connection('user').where('id', id).select('admin');
 
     if(user.admin === 0) {
-      return res.status(400).json({ error: 'User is not an admin' });
+      return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
     // get serie
     const [ serie ] = await connection('serie').where('id', serieId).select('*');
     
     if(serie === undefined) {
-      return res.status(400).json({ result: 'Serie not found' });
+      return res.status(203).json({ message: 'Série não encontrada.' });
     }
 
     // check what is meant to be updated and update it
@@ -186,7 +219,7 @@ class SerieController {
       .select('id');
 
       if(category === undefined) {
-        return res.status(400).json({ error: 'Category not found' });
+        return res.status(203).json({ message: 'Categoria não encontrada.' });
       }
       
       await connection('serie').update({ categoryId: newCategoryId }).where('id', serieId);
@@ -204,24 +237,35 @@ class SerieController {
 
     // validate
     const schema = Yup.object().shape({
-      serieId: Yup.number().required().integer(),
-      id: Yup.number().required().integer(),
+      serieId: Yup.number().required().integer('Série inválida.'),
+      id: Yup.number().required().integer('Usuário inválido.'),
     });
 
-    if(!(await schema.isValid({ serieId, id }))) {
-      return res.status(400).json({ error: 'Validation failed' });
+    const values = { serieId, id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
     }
 
     // check if user is an admin
     const [ user ] = await connection('user').where('id', id).select('admin');
 
     if(user.admin === 0) {
-      return res.status(400).json({ error: 'User is not an admin' });
+      return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
     await connection('serie').where('id', serieId).del();
 
-    return res.status(202).json({ success: true });
+    return res.status(202).json({ message: 'Série removida.' });
   }
 }
 
