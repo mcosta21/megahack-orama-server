@@ -16,34 +16,36 @@ class AuthController {
     // validate
     const schema = Yup.object().shape({
       email: Yup.string().email('E-mail inválido').required('E-mail não informado.'),
-      password: Yup.string().required('Senha não informado.').min(6, 'Senha deve conter no mínimo 6 caracteres.'),
+      password: Yup.string().required('Senha não informado.')
+      .min(6, 'Senha deve conter no mínimo 6 caracteres.'),
     });
     
     const values = { email, password };
+
     if(!(await schema.isValid(values))) {
-      
-      const validation = await schema.validate(values, { abortEarly: false }).then().catch(err => {
-        const errors = [];
-        err.errors.map(message => {
-          errors.push( {"message": message} )
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
         });
         return errors;
-      });
+      }); 
 
-      return res.status(200).json(validation)
+      return res.status(203).json(validation);
     }
 
+    // get user
     const [ user ] = await connection('user').where('email', email).select('*');
 
     if(user === undefined) {
-      return res.status(400).json({ error: 'User not found' });
+      return res.status(203).json({ message: 'Usuário não encontrado.' });
     }
 
     // check password
     const passwordMatch = bcrypt.compareSync(password, user.password);
 
     if(!passwordMatch) {
-      return res.status(400).json({ error: 'Password is incorrect' });
+      return res.status(203).json({ message: 'Senha incorreta.' });
     }
 
     // generate token
@@ -53,7 +55,7 @@ class AuthController {
       expiresIn: authConfig.expiresIn,
     });
 
-    return res.json(AuthView.render(user, token));
+    return res.status(201).json(AuthView.render(user, token));
   }
 }
 
