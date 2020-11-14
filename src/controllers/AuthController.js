@@ -15,12 +15,21 @@ class AuthController {
 
     // validate
     const schema = Yup.object().shape({
-      email: Yup.string().email().required(),
-      password: Yup.string().required().min(6),
+      email: Yup.string().email('E-mail inválido.').required('E-mail não informado.'),
+      password: Yup.string().required('Senha deve conter no mínimo 6 caracteres.').min(6),
     });
-
+    
     if(!(await schema.isValid({ email, password }))) {
-      return res.status(400).json({ error: 'Validation failed' })
+      
+      const validation = await schema.validate().then().catch(err => {
+        const errors = [];
+        err.errors.map(message => {
+          errors.push( {"message": message} )
+        });
+        return errors;
+      });
+
+      return res.status(200).json(validation)
     }
 
     const [ user ] = await connection('user').where('email', email).select('*');

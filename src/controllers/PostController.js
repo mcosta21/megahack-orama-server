@@ -1,7 +1,7 @@
 import connection from '../database/connection';
 import * as Yup from 'yup';
 
-import PostView from '../views/PostView.js';
+//import PostView from '../views/PostView.js';
 
 class PostController {
   static show = async (req, res) => {
