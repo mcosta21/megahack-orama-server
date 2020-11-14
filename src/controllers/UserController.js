@@ -51,7 +51,6 @@ class UserController {
 			email, 
 			password,
 			passwordConfirmation,
-			yieldReceived,
 			admin,
 		} = req.body;
 		
@@ -62,7 +61,6 @@ class UserController {
 			email: Yup.string().email('E-mail inválido.').required('E-mail não informado.'),
 			password: Yup.string().required('Senha inválida.').min(6),
 			passwordConfirmation: Yup.string().required('Senha inválida.').oneOf([Yup.ref('password')]),
-			yieldReceived: Yup.number().required('Valor de rendimento inválido.'),
 			admin: Yup.boolean(),
 		});
 
@@ -72,7 +70,7 @@ class UserController {
 			email,
 			password,
 			passwordConfirmation,
-			yieldReceived,
+			yieldReceived: 0,
 			admin,
     };
 
@@ -105,7 +103,7 @@ class UserController {
 			lastName,
 			email,
 			password: passwordHash,
-			yieldReceived,
+			yieldReceived: 0,
 			admin: admin? true : false,
 		};
 
@@ -115,7 +113,12 @@ class UserController {
 
 		await trx.commit();
 
-		return res.status(201).json(UserView.render(newUser));
+		const data = {
+			id,
+			...newUser,
+		}
+
+		return res.status(201).json(UserView.render(data));
 	}
 
 	static update = async (req, res) => {
