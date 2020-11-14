@@ -6,6 +6,7 @@ exports.up = function(knex) {
     table.boolean('private').notNullable();
     table.integer('userId').notNullable().references('id').inTable('user');
     table.integer('serieId').notNullable().references('id').inTable('serie');
+    table.integer('postId').references('id').inTable('post');
   });
 };
 
