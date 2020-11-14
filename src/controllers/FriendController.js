@@ -19,7 +19,7 @@ class FriendController {
     const friends = await connection('friend').select('*').where('friendOneId', id)
       .orWhere('friendTwoId', id);
 
-    return res.status(200).json(await Promise.all(FriendView.renderMany(friends)));
+    return res.status(200).json(await Promise.all(FriendView.renderMany(friends, id)));
   }
 
   static create = async (req, res) => {

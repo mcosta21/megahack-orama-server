@@ -1,8 +1,6 @@
 import connection from '../database/connection';
 import * as Yup from 'yup';
 
-import PostView from '../views/PostView.js';
-
 class PostController {
   static show = async (req, res) => {
     const { id } = req.params;
@@ -47,7 +45,7 @@ class PostController {
 
       const posts = await connection('post').where('userId', user.id);
 
-      const series = await Promise.all(posts.map(async (post) => {
+      const investments = await Promise.all(posts.map(async (post) => {
         const [ investment ] = await connection('investment').where('postId', post.id)
           .select('serieId');
 
@@ -73,7 +71,7 @@ class PostController {
           firstName: user.firstName,
           lastName: user.lastName,
         },
-        series,
+        investments,
       };
     }));
 
