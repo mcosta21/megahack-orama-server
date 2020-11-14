@@ -77,9 +77,13 @@ class CategoryController {
 		if(category !== undefined) {
 			return res.status(203).json({ error: 'Categoria já existe.' });
     }
+
+    const trx = await connection.transaction();
     
     // create category
-    const [ categoryId ] = await connection('category').insert({ name });
+    const [ categoryId ] = await trx('category').insert({ name });
+
+    await trx.commit();
 
     return res.status(201).json(CategoryView.render(categoryId, name));
   }
@@ -123,8 +127,12 @@ class CategoryController {
       return res.status(203).json({ message: 'Categoria não encontrada.' });
     }
 
+    const trx = await connection.transaction();
+
     // update category name
-    await connection('category').update({ name: newName }).where('id', id);
+    await trx('category').update({ name: newName }).where('id', id);
+
+    await trx.commit();
 
     return res.status(200).json(CategoryView.render(id, newName));
   }
@@ -160,7 +168,11 @@ class CategoryController {
       return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
-    await connection('category').where('id', categoryId).del();
+    const trx = await connection.transaction();
+
+    await trx('category').where('id', categoryId).del();
+
+    await trx.commit();
 
     return res.status(200).json({ message: 'Categoria removida.' });
   }
