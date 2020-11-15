@@ -128,6 +128,53 @@ class FriendController {
 
     return res.status(202).json({ message: 'Amigo removido.' });
   }
+
+  static unknownUsers = async (req, res) => {
+    const id = req.userId;
+
+    // validate
+    const schema = Yup.object().shape({
+      id: Yup.number().required().integer('Usuário inválido.'),
+    });
+
+    const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
+    }
+
+    // get friends
+    const friends = await connection('friend').select('*').where('friendOneId', id)
+      .orWhere('friendTwoId', id);
+
+    const users = await connection('user').select('user.id', 'user.firstName', 'user.lastName').whereNot('id', id);
+    
+    if(friends.length === 0){
+      return res.status(200).json(users);
+    }
+
+    const unknownUsers = users.filter(user => {
+      let unknown = false;
+      friends.map(friend => {
+        if(friend.friendOneId !== user.id && friend.friendTwoId !== user.id){
+          unknown = true;
+        }
+      })
+
+      if(unknown === true){
+        return { id: user.id, firstName: user.firstName, lastName: user.lastName };
+      }
+    })
+    return res.status(200).json(unknownUsers);
+  }
 }
 
 export default FriendController;

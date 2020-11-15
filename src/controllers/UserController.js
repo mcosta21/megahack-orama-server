@@ -50,6 +50,7 @@ class UserController {
 			lastName, 
 			email, 
 			password,
+			passwordConfirmation,
 			yieldReceived,
 			admin,
 		} = req.body;
