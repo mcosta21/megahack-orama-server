@@ -16,7 +16,7 @@ class AuthController {
     // validate
     const schema = Yup.object().shape({
       email: Yup.string().email('E-mail inválido').required('E-mail não informado.'),
-      password: Yup.string().required('Senha não informado.')
+      password: Yup.string().required('Senha não informada.')
       .min(6, 'Senha deve conter no mínimo 6 caracteres.'),
     });
     

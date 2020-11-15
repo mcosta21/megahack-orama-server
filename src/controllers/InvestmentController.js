@@ -28,9 +28,10 @@ class InvestmentController {
 
     // get investments
     const investments = await connection('investment').where('userId', id).select('*');
-
+    
     const data = await Promise.all(investments.map(async (investment) => {
       const [ serie ] = await connection('serie').where('id', investment.serieId).select('title');
+
       return {
         id: investment.id,
         serieTitle: serie.title,
@@ -75,7 +76,7 @@ class InvestmentController {
     const [ serie ] = await connection('serie').where('id', serieId).select('title');
 
     if(serie === undefined) {
-      return res.status(203).json({ message: 'Série não encontrada.' });
+      return res.status(203).json({ message: 'Série não informada.' });
     }
 
     const trx = await connection.transaction();

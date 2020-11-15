@@ -66,7 +66,7 @@ class FriendController {
     const [ user ] = await connection('user').where('id', friendId).select('id');
 
     if(!user) {
-      return res.status(203).json({ message: 'Usuário não encontrado.' });
+      return res.status(203).json({ message: 'Usuário não informado.' });
     }
 
     // check if friendship already exists

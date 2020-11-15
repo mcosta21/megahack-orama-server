@@ -113,7 +113,7 @@ class SerieController {
     const [ category ] = await connection('category').where('id', categoryId).select('id');
     
     if(category === undefined) {
-      return res.status(203).json({ message: 'Categoria não encontrada.' });
+      return res.status(203).json({ message: 'Categoria não informada.' });
     }
 
     const newSerie = {
