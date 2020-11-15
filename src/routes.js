@@ -46,7 +46,6 @@ routes.delete('/series/:serieId', SerieController.destroy);
 routes.get('/friends/', FriendController.index);
 routes.post('/friends', FriendController.create);
 routes.delete('/friends/:friendId', FriendController.destroy);
-routes.get('/friends/unknown', FriendController.unknownUsers);
 
 // investment
 routes.get('/investments/', InvestmentController.index);
