@@ -167,20 +167,24 @@ class FriendController {
     
     if(friends.length === 0){
       return res.status(200).json(users);
+      console.log('every')
     }
 
+    console.log('check')
     const unknownUsers = users.filter(user => {
       let unknown = false;
-      friends.map(friend => {
-        if(friend.friendOneId !== user.id && friend.friendTwoId !== user.id){
-          unknown = true;
-        }
-      })
 
-      if(unknown === true){
-        return { id: user.id, firstName: user.firstName, lastName: user.lastName };
-      }
-    })
+      const teste = friends.map(friend => {
+        if(friend.friendOneId != user.id && friend.friendTwoId !== user.id){
+          return { firstName: user.firstName, friend: true}
+        }
+        else {
+          return { firstName: user.firstName, friend: false }
+        }
+      });
+
+    });
+
     return res.status(200).json(unknownUsers);
   }
 }
