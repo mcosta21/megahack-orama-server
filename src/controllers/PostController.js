@@ -45,7 +45,7 @@ class PostController {
       const [ user ] = await connection('user').where('id', friendId)
         .select('id', 'firstName', 'lastName');
 
-      const posts = await connection('post').where('userId', user.id);
+      const posts = await connection('post').where('userId', user.id).select('id', 'title', 'description');
 
       const investments = await Promise.all(posts.map(async (post) => {
         const [ investment ] = await connection('investment').where('postId', post.id)
@@ -60,8 +60,8 @@ class PostController {
         return {
           serie: {
             id: serie.id,
-            title: serie.title,
-            description: serie.description,
+            title: post.title,
+            description: post.description,
             category: category.name,
           },
         }
