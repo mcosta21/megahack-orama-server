@@ -1,6 +1,8 @@
 import connection from '../database/connection';
 import * as Yup from 'yup';
 
+import PostView from '../views/PostView';
+
 class PostController {
   static show = async (req, res) => {
     const { id } = req.params;
