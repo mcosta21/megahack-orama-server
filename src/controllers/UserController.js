@@ -62,7 +62,6 @@ class UserController {
 			email: Yup.string().email('E-mail inválido.').required('E-mail não informado.'),
 			password: Yup.string().required('Senha inválida.').min(6),
 			passwordConfirmation: Yup.string().required('Senha inválida.').oneOf([Yup.ref('password')]),
-			yieldReceived: Yup.number().required('Valor de rendimento inválido.'),
 			admin: Yup.boolean(),
 		});
 
@@ -72,7 +71,7 @@ class UserController {
 			email,
 			password,
 			passwordConfirmation,
-			yieldReceived,
+			yieldReceived: 0,
 			admin,
     };
 
@@ -105,13 +104,22 @@ class UserController {
 			lastName,
 			email,
 			password: passwordHash,
-			yieldReceived,
+			yieldReceived: 0,
 			admin: admin? true : false,
 		};
 
-		const [ id ] = await connection('user').insert(newUser);
+		const trx = await connection.transaction();
 
-		return res.status(201).json(UserView.render(newUser));
+		const [ id ] = await trx('user').insert(newUser);
+
+		await trx.commit();
+
+		const data = {
+			id,
+			...newUser,
+		}
+
+		return res.status(201).json(UserView.render(data));
 	}
 
 	static update = async (req, res) => {
@@ -158,30 +166,33 @@ class UserController {
 
 		let user;
 
-		// check what needs to be changed
+		const trx = await connection.transaction();
+
+		// check what needs to be changed and update
 		if(newFirstName !== undefined) {
-			user = await connection('user').update('firstName', newFirstName).where('id', id);
+			user = await trx('user').update('firstName', newFirstName).where('id', id);
 		}
 		if(newLastName !== undefined) {
-			user = await connection('user').update('lastName', newLastName).where('id', id);
+			user = await trx('user').update('lastName', newLastName).where('id', id);
 		}
 		if(newEmail !== undefined) {
-			user = await connection('user').update('email', newEmail).where('id', id);
+			user = await trx('user').update('email', newEmail).where('id', id);
 		}
 		if(newPassword !== undefined) {
 			const passwordHash = bcrypt.hashSync(newPassword, 8); 
 
-			user = await connection('user').update('password', passwordHash).where('id', id);
+			user = await trx('user').update('password', passwordHash).where('id', id);
 		}
 
 		if(newYieldReceived !== undefined) {
-			user = await connection('user').update('yieldReceived', newYieldReceived).where('id', id);
+			user = await trx('user').update('yieldReceived', newYieldReceived).where('id', id);
 		}
 
-		[ user ] = await connection('user').where('id', id).select('*');
+		[ user ] = await trx('user').where('id', id).select('*');
+
+		await trx.commit();
 		
 		return res.status(200).json(UserView.render(user));
-
 	}
 
 	static destroy = async (req, res) => {
@@ -207,8 +218,12 @@ class UserController {
       return res.status(203).json(validation);
     }
 
+		const trx = await connection.transaction();
+
 		// delete user
-		await connection('user').where('id', id).del();
+		await trx('user').where('id', id).del();
+
+		await trx.commit();
 
     return res.status(202).json({ message: 'Usuário removido' });
 	}

@@ -66,7 +66,7 @@ class FriendController {
     const [ user ] = await connection('user').where('id', friendId).select('id');
 
     if(!user) {
-      return res.status(203).json({ message: 'Usuário não encontrado.' });
+      return res.status(203).json({ message: 'Usuário não informado.' });
     }
 
     // check if friendship already exists
@@ -82,13 +82,17 @@ class FriendController {
       return res.status(204).json();
     }
 
+    const trx = await connection.transaction();
+
     // create friendship
     const newFriendship = {
       friendOneId: id,
       friendTwoId: friendId,
     }
 
-    await connection('friend').insert(newFriendship);
+    await trx('friend').insert(newFriendship);
+
+    await trx.commit();
 
     return res.status(201).json({ message: 'Amizade criada.' });
   }
@@ -117,14 +121,18 @@ class FriendController {
       return res.status(203).json(validation);
     }
 
+    const trx = await connection.transaction();
+
     // delete friend
-    await connection('friend').where({
+    await trx('friend').where({
       friendOneId: id,
       friendTwoId: friendId,
     }).orWhere({
       friendOneId: friendId,
       friendTwoId: id,
     }).del();
+
+    await trx.commit();
 
     return res.status(202).json({ message: 'Amigo removido.' });
   }

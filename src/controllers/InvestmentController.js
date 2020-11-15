@@ -28,9 +28,10 @@ class InvestmentController {
 
     // get investments
     const investments = await connection('investment').where('userId', id).select('*');
-
+    
     const data = await Promise.all(investments.map(async (investment) => {
       const [ serie ] = await connection('serie').where('id', investment.serieId).select('title');
+
       return {
         id: investment.id,
         serieTitle: serie.title,
@@ -75,8 +76,10 @@ class InvestmentController {
     const [ serie ] = await connection('serie').where('id', serieId).select('title');
 
     if(serie === undefined) {
-      return res.status(203).json({ message: 'Série não encontrada.' });
+      return res.status(203).json({ message: 'Série não informada.' });
     }
+
+    const trx = await connection.transaction();
 
     //create investment
     const newInvestment = {
@@ -87,7 +90,9 @@ class InvestmentController {
       serieId,
     }
 
-    const [ id ] = await connection('investment').insert(newInvestment);
+    const [ id ] = await trx('investment').insert(newInvestment);
+
+    await trx.commit();
 
     const data = {
       id,
@@ -126,10 +131,15 @@ class InvestmentController {
       return res.status(203).json(validation);
     }
 
-    await connection('investment').where({
+    const trx = await connection.transaction();
+
+    // delete investment
+    await trx('investment').where({
       id,
       userId,
     }).del();
+
+    await trx.commit();
 
     return res.status(200).json({ message: 'Investimento removido.' });
   }

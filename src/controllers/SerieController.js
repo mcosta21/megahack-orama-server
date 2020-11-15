@@ -113,7 +113,7 @@ class SerieController {
     const [ category ] = await connection('category').where('id', categoryId).select('id');
     
     if(category === undefined) {
-      return res.status(203).json({ message: 'Categoria não encontrada.' });
+      return res.status(203).json({ message: 'Categoria não informada.' });
     }
 
     const newSerie = {
@@ -123,9 +123,13 @@ class SerieController {
       title,
       description,
       categoryId,
-		};
+    };
+    
+    const trx = await connection.transaction();
 
-    const serieId = await connection('serie').insert(newSerie);
+    const serieId = await trx('serie').insert(newSerie);
+
+    await trx.commit();
     
     const createdSerie = {
       serieId,
@@ -197,33 +201,37 @@ class SerieController {
       return res.status(203).json({ message: 'Série não encontrada.' });
     }
 
+    const trx = await connection.transaction();
+
     // check what is meant to be updated and update it
     if(newCost) {
-      await connection('serie').update({ cost: newCost }).where('id', serieId);
+      await trx('serie').update({ cost: newCost }).where('id', serieId);
     }
     if(newYield) {
-      await connection('serie').update({ yield: newYield }).where('id', serieId);
+      await trx('serie').update({ yield: newYield }).where('id', serieId);
     }
     if(newDuration) {
-      await connection('serie').update({ duration: newDuration }).where('id', serieId);
+      await trx('serie').update({ duration: newDuration }).where('id', serieId);
     }
     if(newTitle) {
-      await connection('serie').update({ title: newTitle }).where('id', serieId);
+      await trx('serie').update({ title: newTitle }).where('id', serieId);
     }
     if(newDescription) {
-      await connection('serie').update({ description: newDescription }).where('id', serieId);
+      await trx('serie').update({ description: newDescription }).where('id', serieId);
     }
     if(newCategoryId) {
       // check if id is valid
-      const [ category ] = await connection('category').where('id', newCategoryId)
+      const [ category ] = await trx('category').where('id', newCategoryId)
       .select('id');
 
       if(category === undefined) {
         return res.status(203).json({ message: 'Categoria não encontrada.' });
       }
       
-      await connection('serie').update({ categoryId: newCategoryId }).where('id', serieId);
+      await trx('serie').update({ categoryId: newCategoryId }).where('id', serieId);
     }
+
+    await trx.commit();
 
     // get updated serie
     const [ updatedSerie ] = await connection('serie').where('id', serieId).select('*');
@@ -263,7 +271,11 @@ class SerieController {
       return res.status(203).json({ message: 'Usuário não é um administrador.' });
     }
 
-    await connection('serie').where('id', serieId).del();
+    const trx = await connection.transaction();
+
+    await trx('serie').where('id', serieId).del();
+
+    await trx.commit();
 
     return res.status(202).json({ message: 'Série removida.' });
   }
