@@ -1,6 +1,6 @@
 # MEGA HACK #5 - Desafio Órama - Server
 
-Essa é o backend do [aplicativo](https://github.com/mcosta21/megahack-orama-mobile) desenvolvido durante a 5º edição da Mega Hack.
+Essa é o backend do [aplicativo](https://github.com/mcosta21/megahack-orama-mobile) desenvolvido durante a 5º edição do Mega Hack.
 
 Foi desenvolvido utilizando NodeJS com Express e seu principal objetivo é de lidar com investimentos de usuários.
 
