@@ -194,3 +194,10 @@ http://localhost:3333/
 |--|--|--|--|
 | /posts/:id| `DELETE`  |`-`|**Code:** 200 - OK<br />**Content:** <br />`{`<br /> `"message": "Post removido."`<br/>`}`<br/>
 
+## Autores
+
+- Marcio Costa [@mcosta21](https://github.com/mcosta21)
+- Victor Ladeira [@ladeira1](https://github.com/ladeira1)
+- Thiago Goulart [@thiagogoulart95](https://github.com/thiagogoulart95)
+- Adriel Medeiros [@Adriel2105](https://github.com/adriel2105)
+
