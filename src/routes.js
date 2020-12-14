@@ -44,6 +44,7 @@ routes.delete('/series/:serieId', SerieController.destroy);
 
 // friend
 routes.get('/friends/', FriendController.index);
+routes.get('/friends/unknown', FriendController.unknown);
 routes.post('/friends', FriendController.create);
 routes.delete('/friends/:friendId', FriendController.destroy);
 

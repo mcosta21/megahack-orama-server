@@ -136,6 +136,70 @@ class FriendController {
 
     return res.status(202).json({ message: 'Amigo removido.' });
   }
+
+  static unknown = async (req, res) => {
+    const id = req.userId;
+
+    // validate
+    const schema = Yup.object().shape({
+      id: Yup.number().required().integer('Usuário inválido.'),
+    });
+
+    const values = { id };
+
+    if(!(await schema.isValid(values))) {
+      const validation = await schema.validate(values, { abortEarly: false })
+      .catch(err => {
+        const errors = err.errors.map(message => {
+          return { "message": message } 
+        });
+        return errors;
+      }); 
+
+      return res.status(203).json(validation);
+    }
+
+    // get friends
+    const friends = await connection('friend').select('*').where('friendOneId', id)
+      .orWhere('friendTwoId', id);
+
+    const friendOne = friends.map(friend => friend.friendOneId);
+    const friendTwo = friends.map(friend => friend.friendTwoId);
+
+    const users = await connection('user').select('user.id', 'user.firstName', 'user.lastName')
+              .whereNot('id', id);
+
+    const unknowns = await users.filter(user => {
+      let checkOne = true;
+      let checkTwo = true;
+
+      for(let i = 0; i < friendOne.length; i++){
+        if(friendOne[i] === user.id){
+          checkOne = false;
+          break;
+        }
+      }
+
+      for(let i = 0; i < friendTwo.length; i++){
+        if(friendTwo[i] === user.id){
+          checkTwo = false;
+          break;
+        }
+      }
+      
+      if(checkOne === true && checkTwo === true){
+        return true;
+      }
+      else {
+        return false;
+      }
+    })
+    
+    return res.status(200).json(unknowns);
+  }
+
 }
+
+
 
 export default FriendController;
